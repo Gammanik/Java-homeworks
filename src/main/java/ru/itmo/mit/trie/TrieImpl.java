@@ -1,26 +1,71 @@
 package ru.itmo.mit.trie;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
 
-public class TrieImpl implements Trie, SerializableTrie {
+
+public class TrieImpl implements SerializableTrie {
 
     @Override
     public void serialize(OutputStream out) throws IOException {
+        DataOutputStream stream = new DataOutputStream(out);
+        Stack<Vertex> st = new Stack<>();
+        Vertex tmp = this.root;
 
+        tmp.serialize(stream, st);
+        while (!st.empty()) {
+            tmp = st.pop();
+            tmp.serialize(stream, st);
+        }
+        tmp.serialize(stream, st);
     }
 
     @Override
     public void deserialize(InputStream in) throws IOException {
+        DataInputStream stream = new DataInputStream(in);
+        Stack<Vertex> st = new Stack<>();
+        Vertex rt = new Vertex();
+        Vertex tmp = rt;
 
+        tmp.deserialize(stream, st);
+        while (!st.empty()) {
+            tmp = st.pop();
+            tmp.deserialize(stream, st);
+        }
+        tmp.deserialize(stream, st);
+        this.root = rt;
     }
 
-    class Vertex {
+
+class Vertex implements Serializable {
+
+        void serialize(DataOutputStream stream, Stack<Vertex> st) throws IOException {
+            stream.writeBoolean(this.isTerminal);
+            stream.writeInt(this.mp.size());
+            stream.writeInt(this.containsWords);
+            for (Map.Entry<Character, Vertex> entry : this.mp.entrySet()) {
+                stream.writeChar(entry.getKey());
+                st.push(entry.getValue());
+            }
+        }
+
+        void deserialize(DataInputStream stream, Stack<Vertex> st) throws IOException {
+            this.isTerminal = stream.readBoolean();
+            int mapSize = stream.readInt();
+            this.containsWords = stream.readInt();
+
+            for (int i = 0; i < mapSize; i++) {
+                char ch = stream.readChar();
+                Vertex next = new Vertex();
+                this.mp.put(ch, next);
+                st.push(next);
+            }
+        }
+
+
         boolean isTerminal = false;
         int containsWords = 0;
-        HashMap<Character, Vertex> mp = new HashMap<>();
+        final HashMap<Character, Vertex> mp = new HashMap<>();
 
         Vertex addOrPass(Character ch) {
             containsWords++;
@@ -39,7 +84,7 @@ public class TrieImpl implements Trie, SerializableTrie {
         boolean hasChar(Character ch) { return mp.containsKey(ch); }
     }
 
-    private final Vertex root = new Vertex();
+    private Vertex root = new Vertex();
 
     @Override
     public boolean add(String el) {

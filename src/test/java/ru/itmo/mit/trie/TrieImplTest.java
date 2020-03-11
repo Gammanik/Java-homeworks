@@ -162,7 +162,7 @@ public class TrieImplTest {
             mp.put(st, st);
         }
 
-        // should contains all added strings
+        // should contain all added strings
         for (String st : mp.keySet()) {
             assertTrue(this.tr.contains(st));
         }
