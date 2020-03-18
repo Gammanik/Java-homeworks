@@ -1,5 +1,3 @@
-import java.util.function.Function;
-
 interface Function2<X, Y, R> {
     R apply(X x, Y y);
 
