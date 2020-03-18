@@ -1,5 +1,3 @@
-
-
 interface Predicate<X> extends Function1<X, Boolean> {
     Predicate<Object> ALWAYS_TRUE    = x -> true;
     Predicate<Object> ALWAYS_FALSE   = x -> false;
