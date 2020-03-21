@@ -16,15 +16,12 @@ public interface Dictionary<K, V> extends Map<K, V> {
     int size();
 
     /*
-     * true, если такой ключ содержится в таблице
-     * Если key не является объектом класса K бросить ClassCastException или
-     *  вернуть false
+     * true, если такой ключ содержится в таблице, иначе false
      */
     @Override
     boolean containsKey(Object key);
 
     /* Возвращает значение, хранимое по ключу key. Если такого нет, возвращает null
-     * Если key не является объектом класса K бросить ClassCastException или вернуть null
      */
     @Override
     V get(Object key);
@@ -40,7 +37,6 @@ public interface Dictionary<K, V> extends Map<K, V> {
      * Забыть про пару key-value для переданного key
      * и вернуть забытое value, либо null, если такой пары не было;
      * провести рехеширование по необходимости
-     * Если key не является объектом класса K бросить ClassCastException или вернуть null
      */
     @Override
     V remove(Object key);
