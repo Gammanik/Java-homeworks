@@ -1,13 +1,12 @@
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class Collections {
 
     public static <X, R> Collection<R> map(Function1<? super X, ? extends R> f, Iterable<? extends X> it) {
         List<R> acc = new ArrayList<>();
-        for (X t : it) { acc.add(f.apply(t)); }
+        for (X t : it) {
+            acc.add(f.apply(t));
+        }
         return acc;
     }
 
@@ -46,11 +45,8 @@ public class Collections {
     }
 
     public static <X, Y> Y foldr(Function2<? super X, ? super Y, ? extends Y> func, Y zero, Iterable<? extends X> it) {
-        Stack<X> stack = new Stack<>();
-        for (X curr : it) {
-            stack.add(curr);
-        }
-
+        LinkedList<X> stack = new LinkedList<>();
+        it.forEach(stack::add);
         Y acc = zero;
         for (X curr : stack) {
             acc = func.apply(curr, acc);
