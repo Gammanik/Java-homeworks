@@ -135,7 +135,7 @@ public class DictionaryImplTest {
         Iterator<Map.Entry<String, Integer>> it = dc.entrySet().iterator();
         it.next();
         it.next();
-//        it.remove(); todo:
+//        it.remove();
 
         Map.Entry<String, Integer> p3 = it.next();
         assertEquals(p3.getKey(), "3");
@@ -160,8 +160,69 @@ public class DictionaryImplTest {
         assertEquals(dc.remove("4"), (Integer) 4);
     }
 
+    private DictionaryImpl<String, Integer> genDict(int sz, int bound, Map<String, Integer> mp) {
+        DictionaryImpl<String, Integer> myD = new DictionaryImpl<>();
+        Random rand = new Random();
+
+        for (int i = 0; i < sz; i++) {
+            int rnd = rand.nextInt(bound);
+            mp.put(Integer.toString(rnd), i);
+            myD.put(Integer.toString(rnd), i);
+        }
+
+        return myD;
+    }
+
+//    @Test
+//    public void clearTest() {
+//
+//        dc.put("gg", 1);
+//        assertEquals(dc.size(), 1);
+//        dc.clear();
+//        assertEquals(dc.size(), 0);
+//
+////        dc = genDict(1000, 200);
+////        assertEquals(dc.size(), 1000);
+////        dc.clear();
+//
+//    }
+
     @Test
-    public void clearTest() {
+    public void keySetTest() {
+        dc.put("mm", 1);
+        Iterator<String> it = dc.keySet().iterator();
+        assertEquals(it.next(), "mm");
+        assertFalse(it.hasNext());
+
+        LinkedHashMap<String, Integer> mp = new LinkedHashMap<>();
+        dc = genDict(1000, 200, mp);
+
+        for (String k : dc.keySet()) {
+            assertEquals(dc.get(k), mp.get(k));
+            assertTrue(dc.containsKey(k));
+        }
+    }
+
+
+    @Test
+    public void ValuesTest() {
+        dc.put("mm", 1);
+        Iterator<Integer> it = dc.values().iterator();
+        assertEquals(it.next(), (Integer) 1);
+        assertFalse(it.hasNext());
+
+        LinkedHashMap<String, Integer> mp = new LinkedHashMap<>();
+        dc = genDict(1000, 200, mp);
+
+        ArrayList<Integer> allValues = new ArrayList<>(mp.values());
+        for (Integer v : allValues) {
+            assertTrue(dc.containsValue(v));
+        }
+
+        ArrayList<Integer> allValuesDict = new ArrayList<>(dc.values());
+        for (Integer v : allValuesDict) {
+            assertTrue(mp.containsValue(v));
+        }
 
     }
 

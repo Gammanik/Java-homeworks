@@ -8,7 +8,7 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
     private int sz = 0;
     private int buckets = 2;
     private ArrayList<List<Entry<K, V>>> arr = new ArrayList<>(buckets);
-//            new ArrayList<>(Collections.nCopies(buckets, new LinkedList<>()));
+    private final int RESIZE_FACTOR = 2;
 
     DictionaryImpl() {
         for (int i = 0; i <buckets; i++) {
@@ -50,7 +50,6 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
     }
 
     private void rehash() {
-        buckets *= 2;
         ArrayList<List<Entry<K, V>>> tmpArr = new ArrayList<>(buckets);
         for (int i = 0; i < buckets; i++) {
             tmpArr.add(new LinkedList<>());
@@ -65,14 +64,19 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
         arr = tmpArr;
     }
 
-    private boolean isFilled() {
+    private boolean isFilledEnough() {
         return sz >= Math.round(buckets * LOAD_FACTOR);
+    }
+
+    private boolean isFreeEnough() {
+        return sz <= Math.round(buckets * LOAD_FACTOR / RESIZE_FACTOR);
     }
 
     @Override
     public V put(K key, V value) {
         sz += 1;
-        if (isFilled()) {
+        if (isFilledEnough()) {
+            buckets *= RESIZE_FACTOR;
             rehash();
         }
 
@@ -111,12 +115,15 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
         return get(key) != null;
     }
 
-
-
     @Override
     public V remove(Object key) {
         int i = getBucket(key);
         List<Entry<K, V>> lst = arr.get(i);
+        
+        if (isFreeEnough()) {
+            buckets = (int) Math.round((double) buckets / (double) RESIZE_FACTOR);
+            rehash();
+        }
 
         V val = get(key);
         lst.removeIf(el -> el.getKey().equals(key));
@@ -127,20 +134,10 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
         return val;
     }
 
-    @Override // todo: able not to write it too?
-    public void clear() {
-
-    }
-
-    @Override
-    public @NotNull Set<K> keySet() {
-        return null;
-    }
-
-    @Override
-    public @NotNull Collection<V> values() {
-        return null;
-    }
+//    @Override // todo: able not to write it
+//    public void clear() {
+//
+//    }
 
     @Override
     public @NotNull Set<Entry<K, V>> entrySet() {
@@ -157,11 +154,10 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
         };
     }
 
-
     class DictionaryIterator implements Iterator<Entry<K, V>> {
         final java.util.Iterator<List<Entry<K,V>>> it = arr.iterator();
         java.util.Iterator<Entry<K, V>> subIt = it.next().iterator();
-        Entry<K, V> lastNext = null;
+        int lastId = -1;
 
         DictionaryIterator() {
             while (!subIt.hasNext() && it.hasNext()) {
@@ -180,7 +176,6 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
             while (!subIt.hasNext() && it.hasNext()) {
                 subIt = it.next().iterator();
             }
-
             return nxt;
         }
 
