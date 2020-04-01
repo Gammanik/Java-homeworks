@@ -61,10 +61,7 @@ public class DictionaryImplTest {
             assertTrue(dc.containsKey(el.getKey()));
         }
 
-        int i = 0;
         for (Map.Entry<String, Integer> el : dc.entrySet()) {
-            i += 1;
-            System.out.println(el.getKey() + ": " + el.getValue() + " - " + i);
             assertEquals(el.getValue(), mp.get(el.getKey()));
         }
     }
@@ -80,15 +77,11 @@ public class DictionaryImplTest {
         }
 
         for (Map.Entry<String, Integer> el : mp.entrySet()) {
-            System.out.println(el.getKey() + ": " + el.getValue());
             assertEquals(dc.get(el.getKey()), el.getValue());
             assertTrue(dc.containsKey(el.getKey()));
         }
 
-        int i = 0;
         for (Map.Entry<String, Integer> el : dc.entrySet()) {
-            i += 1;
-            System.out.println(el.getKey() + ": " + el.getValue() + " - " + i);
             assertEquals(el.getValue(), mp.get(el.getKey()));
         }
 
@@ -124,25 +117,6 @@ public class DictionaryImplTest {
         assertFalse(it.hasNext());
     }
 
-
-    @Test
-    public void iterRemoveTest() {
-        assertEquals(dc.size(), 0);
-
-        assertNull(dc.put("1", 1));
-        assertNull(dc.put("2", 2));
-        assertNull(dc.put("3", 3));
-        Iterator<Map.Entry<String, Integer>> it = dc.entrySet().iterator();
-        it.next();
-        it.next();
-//        it.remove();
-
-        Map.Entry<String, Integer> p3 = it.next();
-        assertEquals(p3.getKey(), "3");
-        assertEquals(p3.getValue(), (Integer) 3);
-        assertFalse(it.hasNext());
-    }
-
     @Test
     public void removeTest() {
         assertNull(dc.put("1", 1));
@@ -172,20 +146,6 @@ public class DictionaryImplTest {
 
         return myD;
     }
-
-//    @Test
-//    public void clearTest() {
-//
-//        dc.put("gg", 1);
-//        assertEquals(dc.size(), 1);
-//        dc.clear();
-//        assertEquals(dc.size(), 0);
-//
-////        dc = genDict(1000, 200);
-////        assertEquals(dc.size(), 1000);
-////        dc.clear();
-//
-//    }
 
     @Test
     public void keySetTest() {
@@ -226,5 +186,47 @@ public class DictionaryImplTest {
 
     }
 
+
+    @Test
+    public void iterRemoveTest() {
+        assertEquals(dc.size(), 0);
+        assertNull(dc.put("1", 1));
+        assertNull(dc.put("2", 2));
+        assertNull(dc.put("3", 3));
+        Iterator<Map.Entry<String, Integer>> it = dc.entrySet().iterator();
+        it.next();
+
+        it.remove();
+        assertEquals(dc.size(), 2);
+        assertNull(dc.get("1"));
+        assertTrue(it.hasNext());
+
+        Map.Entry<String, Integer> e = it.next();
+        assertEquals(e.getKey(), "2");
+        assertEquals(e.getValue(), (Integer) 2);
+        it.remove();
+        assertNull(dc.get(e.getKey()));
+        assertTrue(it.hasNext());
+
+        it.next();
+        it.remove();
+        assertNull(dc.get("3"));
+        assertFalse(it.hasNext());
+    }
+
+
+    @Test
+    public void clearTest() {
+        dc.put("gg", 1);
+        assertEquals(dc.size(), 1);
+        dc.clear();
+        assertEquals(dc.size(), 0);
+        assertNull(dc.get("gg"));
+
+        dc = genDict(1000, 200, new LinkedHashMap<>());
+        dc.clear();
+        assertEquals(dc.size(), 0);
+
+    }
 
 }

@@ -9,14 +9,16 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
     private int buckets = 2;
     private ArrayList<List<Entry<K, V>>> arr = new ArrayList<>(buckets);
     private final int RESIZE_FACTOR = 2;
+    private double LOAD_FACTOR = 0.8;
 
     DictionaryImpl() {
         for (int i = 0; i <buckets; i++) {
             arr.add(new LinkedList<>());
         }
     }
-
-    private final double LOAD_FACTOR = 0.8;
+    public void setLoadFactor(double newLoadFactor) {
+        LOAD_FACTOR = newLoadFactor;
+    }
 
     static class Pair<L, R> implements Entry<L, R> {
         private L k;
@@ -134,14 +136,10 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
         return val;
     }
 
-//    @Override // todo: able not to write it
-//    public void clear() {
-//
-//    }
-
     @Override
     public @NotNull Set<Entry<K, V>> entrySet() {
         return new AbstractSet<Entry<K, V>>() {
+            @NotNull
             @Override
             public Iterator<Entry<K, V>> iterator() {
                 return new DictionaryIterator();
@@ -155,9 +153,10 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
     }
 
     class DictionaryIterator implements Iterator<Entry<K, V>> {
-        final java.util.Iterator<List<Entry<K,V>>> it = arr.iterator();
-        java.util.Iterator<Entry<K, V>> subIt = it.next().iterator();
-        int lastId = -1;
+        private final Iterator<List<Entry<K,V>>> it = arr.iterator();
+        private Iterator<Entry<K, V>> subIt = it.next().iterator();
+        private Entry<K, V> lstNxt;
+        private boolean changingBucked = false;
 
         DictionaryIterator() {
             while (!subIt.hasNext() && it.hasNext()) {
@@ -172,19 +171,28 @@ public class DictionaryImpl<K, V> extends AbstractMap<K, V> implements Dictionar
 
         @Override
         public Entry<K, V> next() {
-            Entry<K, V> nxt = subIt.next();
+            lstNxt = subIt.next();
+            changingBucked = false;
             while (!subIt.hasNext() && it.hasNext()) {
                 subIt = it.next().iterator();
+                changingBucked = true;
             }
-            return nxt;
+            return lstNxt;
         }
 
         @Override
         public void remove() {
-            // todo:
-            subIt.remove();
+            // todo: can't do rehash here because of UB in iterator
+            if (changingBucked) {
+                K key = lstNxt.getKey();
+                arr.get(getBucket(key)).removeIf(e -> e.getKey().equals(key));
+            } else {
+                subIt.remove();
+                K key = lstNxt.getKey();
+                arr.get(getBucket(key)).removeIf(e -> e.getKey().equals(key));
+            }
+            sz -= 1;
         }
     };
-
 
 }
